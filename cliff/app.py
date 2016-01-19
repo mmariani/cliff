@@ -173,6 +173,25 @@ class App(object):
         )
         return parser
 
+    def log_formatter(self):
+        """Allow subclasses to customize the formatter.
+
+        For instance with the colorlog package:
+
+        def log_formatter(self):
+            return colorlog.ColoredFormatter(
+                "%(log_color)s%(levelname)-8s%(reset)s %(cyan)s%(message)s",
+                log_colors={
+                    'DEBUG':    'cyan',
+                    'INFO':     'green',
+                    'WARNING':  'yellow',
+                    'ERROR':    'red',
+                    'CRITICAL': 'red,bg_white',
+                }
+            )
+        """
+        return logging.Formatter(self.LOG_FILE_MESSAGE_FORMAT)
+
     def configure_logging(self):
         """Create logging handlers for any log output.
         """
@@ -184,7 +203,7 @@ class App(object):
             file_handler = logging.FileHandler(
                 filename=self.options.log_file,
             )
-            formatter = logging.Formatter(self.LOG_FILE_MESSAGE_FORMAT)
+            formatter = self.logging_formatter()
             file_handler.setFormatter(formatter)
             root_logger.addHandler(file_handler)
 
@@ -195,7 +214,7 @@ class App(object):
                          2: logging.DEBUG,
                          }.get(self.options.verbose_level, logging.DEBUG)
         console.setLevel(console_level)
-        formatter = logging.Formatter(self.CONSOLE_MESSAGE_FORMAT)
+        formatter = self.log_formatter()
         console.setFormatter(formatter)
         root_logger.addHandler(console)
         return
